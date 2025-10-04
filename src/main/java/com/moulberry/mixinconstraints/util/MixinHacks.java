@@ -57,8 +57,8 @@ public final class MixinHacks {
             method.setAccessible(true);
             MIXIN_INFO_GET_STATE = lookup.unreflect(method);
 
-            method = MixinInfo$State.getDeclaredMethod("classNode");
-            method.setAccessible(true);
+            field = MixinInfo$State.getDeclaredField("classNode");
+            field.setAccessible(true);
             STATE_CLASS_NODE = lookup.unreflect(method);
 
             field = Extensions.class.getDeclaredField("extensions");
