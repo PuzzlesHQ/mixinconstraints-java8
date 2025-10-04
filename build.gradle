@@ -27,16 +27,19 @@ dependencies {
 
 tasks.register("sourcesJar", Jar) {
     group = "build"
-    archiveClassifier.set("sources")
-    sourceSets.map { it.allSource }.forEach {
-        from(it)
-    }
+    from sourceSets.main.allSource
+    archiveClassifier = "sources"
 }
 
 publishing {
     publications {
         maven(MavenPublication) {
+            groupId = "com.moulberry.mixinconstraints"
+            artifactId = "mixinconstraints"
+
             from components.java
+
+            artifact source: sourcesJar, classifier: 'sources', extension: 'jar'
 
             pom {
                 name = "MixinConstraints"
