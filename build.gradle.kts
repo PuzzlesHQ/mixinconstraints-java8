@@ -14,9 +14,8 @@ group = "com.moulberry.mixinconstraints"
 idea.module.isDownloadSources = true
 
 java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
-    }
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 repositories {
@@ -26,36 +25,14 @@ repositories {
     maven("https://maven.neoforged.net/releases")
 }
 
-val fabric: SourceSet by sourceSets.creating {
-    compileClasspath += sourceSets.main.get().output
-}
-
-val forge: SourceSet by sourceSets.creating {
-    compileClasspath += sourceSets.main.get().output
-}
-
-val neoforge: SourceSet by sourceSets.creating {
-    compileClasspath += sourceSets.main.get().output
-}
-
 dependencies {
     compileOnly("org.spongepowered:mixin:0.8.5")
     compileOnly("org.ow2.asm:asm-tree:9.7")
-    compileOnly("org.slf4j:slf4j-api:2.0.12")
+    compileOnly("org.apache.logging.log4j:log4j-api:2.19.0")
     compileOnly("org.jetbrains:annotations:24.1.0")
-
-    "fabricImplementation"("net.fabricmc:fabric-loader:0.15.0")
-
-    "forgeImplementation"("net.minecraftforge:fmlloader:1.20.1-47.3.27")
-    "forgeImplementation"("net.minecraftforge:fmlcore:1.20.1-47.3.27")
-
-    "neoforgeImplementation"("net.neoforged.fancymodloader:loader:3.0.13")
 }
 
 tasks.jar {
-    from(fabric.output)
-    from(forge.output)
-    from(neoforge.output)
     manifest {
         attributes(
             "FMLModType" to "GAMELIBRARY",

@@ -12,6 +12,8 @@ import org.spongepowered.asm.mixin.transformer.ext.extensions.ExtensionCheckClas
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -34,6 +36,7 @@ public final class MixinHacks {
 
     private static boolean initialized = false;
 
+
     private static void tryInit() {
         if (initialized) {
             return;
@@ -42,23 +45,29 @@ public final class MixinHacks {
 
         try {
             Class<?> TargetClassContext = Class.forName("org.spongepowered.asm.mixin.transformer.TargetClassContext");
-            MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(TargetClassContext, MethodHandles.lookup());
-            TARGET_CLASS_CONTEXT_MIXINS = lookup.findGetter(TargetClassContext, "mixins", SortedSet.class);
+            MethodHandles.Lookup lookup = MethodHandles.lookup();
+            Field field = TargetClassContext.getDeclaredField("mixins");
+            field.setAccessible(true);
+            TARGET_CLASS_CONTEXT_MIXINS = lookup.unreflectGetter(field);
 
             Class<?> MixinInfo = Class.forName("org.spongepowered.asm.mixin.transformer.MixinInfo");
             Class<?> MixinInfo$State = Class.forName("org.spongepowered.asm.mixin.transformer.MixinInfo$State");
 
-            lookup = MethodHandles.privateLookupIn(MixinInfo, MethodHandles.lookup());
-            MIXIN_INFO_GET_STATE = lookup.findVirtual(MixinInfo, "getState", MethodType.methodType(MixinInfo$State));
+            Method method = MixinInfo.getDeclaredMethod("getState");
+            method.setAccessible(true);
+            MIXIN_INFO_GET_STATE = lookup.unreflect(method);
 
-            lookup = MethodHandles.privateLookupIn(MixinInfo$State, MethodHandles.lookup());
-            STATE_CLASS_NODE = lookup.findGetter(MixinInfo$State, "classNode", ClassNode.class);
+            method = MixinInfo$State.getDeclaredMethod("classNode");
+            method.setAccessible(true);
+            STATE_CLASS_NODE = lookup.unreflect(method);
 
-            lookup = MethodHandles.privateLookupIn(Extensions.class, MethodHandles.lookup());
-
-            EXTENSIONS_EXTENSIONS = lookup.findGetter(Extensions.class, "extensions", List.class);
-            EXTENSIONS_ACTIVE_EXTENSIONS_GET = lookup.findGetter(Extensions.class, "activeExtensions", List.class);
-            EXTENSIONS_ACTIVE_EXTENSIONS_SET = lookup.findSetter(Extensions.class, "activeExtensions", List.class);
+            field = Extensions.class.getDeclaredField("extensions");
+            field.setAccessible(true);
+            EXTENSIONS_EXTENSIONS = lookup.unreflectGetter(field);
+            field = Extensions.class.getDeclaredField("activeExtensions");
+            field.setAccessible(true);
+            EXTENSIONS_ACTIVE_EXTENSIONS_GET = lookup.unreflectGetter(field);
+            EXTENSIONS_ACTIVE_EXTENSIONS_SET = lookup.unreflectSetter(field);
 
         } catch (Throwable e) {
             throw new RuntimeException(e);

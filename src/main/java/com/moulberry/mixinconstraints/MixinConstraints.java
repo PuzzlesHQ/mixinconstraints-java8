@@ -2,17 +2,17 @@ package com.moulberry.mixinconstraints;
 
 import com.moulberry.mixinconstraints.checker.AnnotationChecker;
 import com.moulberry.mixinconstraints.util.Abstractions;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.ClassNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.service.MixinService;
 
 import java.io.IOException;
 
 public class MixinConstraints {
 
-    public static final Logger LOGGER = LoggerFactory.getLogger("mixinconstraints");
+    public static final Logger LOGGER = LogManager.getLogger("mixinconstraints");
     public static final boolean VERBOSE = "true".equals(System.getProperty("mixinconstraints.verbose"));
 
     public static boolean shouldApplyMixin(String mixinClassName) {
@@ -54,25 +54,35 @@ public class MixinConstraints {
      */
     @Deprecated
     public static Loader getLoader() {
-        return switch (Abstractions.getLoaderName()) {
-            case "Forge" -> Loader.FORGE;
-            case "NeoForge" -> Loader.NEOFORGE;
-            case "Fabric" -> Loader.FABRIC;
-            default -> Loader.CUSTOM;
+        switch (Abstractions.getLoaderName()) {
+            case "Forge": return Loader.FORGE;
+            case "NeoForge": return Loader.NEOFORGE;
+            case "Fabric": return Loader.FABRIC;
+            case "Puzzle Loader": return Loader.PUZZLE_LOADER;
         };
+        return Loader.CUSTOM;
     }
 
     public enum Loader {
-        FORGE, NEOFORGE, FABRIC, CUSTOM;
+        FORGE, NEOFORGE, FABRIC, PUZZLE_LOADER, CUSTOM;
 
         @Override
         public String toString() {
-            return switch (this) {
-                case FORGE -> "Forge";
-                case NEOFORGE -> "NeoForge";
-                case FABRIC -> "Fabric";
-                case CUSTOM -> getLoaderName();
-            };
+            switch (this) {
+                case FORGE: {
+                    return "Forge";
+                }
+                case NEOFORGE: {
+                    return "NeoForge";
+                }
+                case FABRIC: {
+                    return "Fabric";
+                }
+                case PUZZLE_LOADER: {
+                    return "Puzzle Loader";
+                }
+            }
+            return getLoaderName();
         }
     }
 }
