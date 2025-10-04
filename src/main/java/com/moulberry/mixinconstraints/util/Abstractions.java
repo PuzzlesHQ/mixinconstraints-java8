@@ -22,27 +22,8 @@ public abstract class Abstractions {
             abstractions = new ArrayList<>();
 
             String name = System.getProperty("mixinconstraints.abstraction");
-            if (name != null && !name.isBlank()) {
+            if (name != null && !name.isEmpty()) {
                 Abstractions instance = tryLoadAbstractionsFromClassname(name);
-                if (instance != null) {
-                    abstractions.add(instance);
-                }
-            }
-
-            if (doesClassExist("net.neoforged.fml.loading.FMLLoader")) {
-                Abstractions instance = tryLoadAbstractionsFromClassname("com.moulberry.mixinconstraints.NeoForgeAbstractionsImpl");
-                if (instance != null) {
-                    abstractions.add(instance);
-                }
-            }
-            if (doesClassExist("net.minecraftforge.fml.loading.FMLLoader")) {
-                Abstractions instance = tryLoadAbstractionsFromClassname("com.moulberry.mixinconstraints.ForgeAbstractionsImpl");
-                if (instance != null) {
-                    abstractions.add(instance);
-                }
-            }
-            if (doesClassExist("net.fabricmc.loader.api.FabricLoader")) {
-                Abstractions instance = tryLoadAbstractionsFromClassname("com.moulberry.mixinconstraints.FabricAbstractionsImpl");
                 if (instance != null) {
                     abstractions.add(instance);
                 }
