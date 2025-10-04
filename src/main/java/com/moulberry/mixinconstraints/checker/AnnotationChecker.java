@@ -10,6 +10,9 @@ import com.moulberry.mixinconstraints.annotations.IfModLoadeds;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AnnotationNode;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class AnnotationChecker {
@@ -19,18 +22,17 @@ public class AnnotationChecker {
     private static final String IF_MOD_ABSENT_DESC = Type.getDescriptor(IfModAbsent.class);
     private static final String IF_MOD_ABSENTS_DESC = Type.getDescriptor(IfModAbsents.class);
     private static final String IF_DEV_ENVIRONMENT_DESC = Type.getDescriptor(IfDevEnvironment.class);
-    private static final String IF_MINECRAFT_VERSION_DESC = Type.getDescriptor(IfMinecraftVersion.class);
 
     public static boolean isConstraintAnnotationNode(AnnotationNode node) {
         return IF_MOD_LOADED_DESC.equals(node.desc) || IF_MOD_LOADEDS_DESC.equals(node.desc) ||
             IF_MOD_ABSENT_DESC.equals(node.desc) || IF_MOD_ABSENTS_DESC.equals(node.desc) ||
-            IF_DEV_ENVIRONMENT_DESC.equals(node.desc) || IF_MINECRAFT_VERSION_DESC.equals(node.desc);
+            IF_DEV_ENVIRONMENT_DESC.equals(node.desc);
     }
 
     @SuppressWarnings({"BooleanMethodIsAlwaysInverted", "DuplicatedCode"})
     public static boolean checkAnnotationNode(AnnotationNode node) {
         if (IF_MOD_LOADEDS_DESC.equals(node.desc) || IF_MOD_ABSENTS_DESC.equals(node.desc)) {
-            List<AnnotationNode> innerNodes = getAnnotationValue(node, "value", List.of());
+            List<AnnotationNode> innerNodes = getAnnotationValue(node, "value", new ArrayList<>());
             for (AnnotationNode innerNode : innerNodes) {
                 if (!checkAnnotationNode(innerNode)) {
                     return false;
@@ -43,7 +45,7 @@ public class AnnotationChecker {
             String value = getAnnotationValue(node, "value", "");
             if (value.isEmpty()) throw new IllegalArgumentException("modid must not be empty");
 
-            List<String> aliases = getAnnotationValue(node, "aliases", List.of());
+            List<String> aliases = getAnnotationValue(node, "aliases", new ArrayList<>());
             String minVersion = getAnnotationValue(node, "minVersion", null);
             String maxVersion = getAnnotationValue(node, "maxVersion", null);
             boolean minInclusive = getAnnotationValue(node, "minInclusive", true);
@@ -61,7 +63,7 @@ public class AnnotationChecker {
             String value = getAnnotationValue(node, "value", "");
             if (value.isEmpty()) throw new IllegalArgumentException("modid must not be empty");
 
-            List<String> aliases = getAnnotationValue(node, "aliases", List.of());
+            List<String> aliases = getAnnotationValue(node, "aliases", new ArrayList<>());
             String minVersion = getAnnotationValue(node, "minVersion", null);
             String maxVersion = getAnnotationValue(node, "maxVersion", null);
             boolean minInclusive = getAnnotationValue(node, "minInclusive", true);
@@ -83,21 +85,6 @@ public class AnnotationChecker {
             if (MixinConstraints.VERBOSE) {
                 String result = pass ? "PASS" : "FAILED";
                 MixinConstraints.LOGGER.info("@IfDevEnvironment(negate={}) {}", negate, result);
-            }
-
-            return pass;
-        } else if (IF_MINECRAFT_VERSION_DESC.equals(node.desc)) {
-            String minVersion = getAnnotationValue(node, "minVersion", null);
-            String maxVersion = getAnnotationValue(node, "maxVersion", null);
-            boolean negate = getAnnotationValue(node, "negate", false);
-            boolean minInclusive = getAnnotationValue(node, "minInclusive", true);
-            boolean maxInclusive = getAnnotationValue(node, "maxInclusive", true);
-
-            boolean pass = ConstraintChecker.checkMinecraftVersion(minVersion, maxVersion, minInclusive, maxInclusive) != negate;
-
-            if (MixinConstraints.VERBOSE) {
-                String result = pass ? "PASS" : "FAILED";
-                MixinConstraints.LOGGER.info("@IfMinecraftVersion(minVersion={}, maxVersion={}, negate={}, minInclusive={}, maxInclusive={}) {}", minVersion, maxVersion, minInclusive, maxInclusive, negate, result);
             }
 
             return pass;
